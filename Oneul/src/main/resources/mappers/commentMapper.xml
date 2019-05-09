@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="kr.co.oneul.commentMapper">
+
+	<select id="listComment" resultType="commentVO">
+	   <![CDATA[
+		SELECT NICKNAME, DIARY_NO, USERID, REGDATE, COMMENT_NO, NICKNAME, CONTENTS 
+		FROM TB_COMMENT 
+		WHERE DIARY_NO = #{diary_no}
+		ORDER BY REGDATE DESC
+		]]>
+	</select>
+	
+	<insert id="writeComment">
+		<![CDATA[
+		INSERT INTO TB_COMMENT(COMMENT_NO, DIARY_NO, USERID, NICKNAME, CONTENTS)
+		VALUES(SEQ_COMMENT_NO.NEXTVAL, #{diary_no}, #{userid}, #{nickname}, #{contents})
+		]]>
+	</insert>
+
+	<delete id="deleteComment">
+		<![CDATA[
+		DELETE TB_COMMENT 
+		WHERE COMMENT_NO=#{comment_no}
+		]]>
+	</delete>
+	
+	<update id="updateComment">
+		<![CDATA[
+		UPDATE TB_COMMENT SET CONTENTS=#{contents} 
+		WHERE COMMENT_NO=#{comment_no}
+		]]>
+	</update>
+	
+</mapper>

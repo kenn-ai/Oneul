@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+  xmlns:sec="http://www.springframework.org/schema/security"	
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+    
+   <!--  <sec:http pattern="/user/login" security="none" />-->
+    <sec:http pattern="/user/actLogin" security="none" /> 
+    <sec:http pattern="/resources/**" security="none" />
+            
+    <sec:http auto-config="false" use-expressions="true" >
+    
+    <!-- 
+ 
+    
+    -->
+    
+        <sec:form-login 
+            login-page="/user/login"
+    		login-processing-url="/user/actLogin"
+			username-parameter="userid"
+			password-parameter="userpw"			
+			default-target-url="/home" 
+			authentication-failure-url="/user/login"
+			always-use-default-target="true"
+        />
+        
+        <!-- <sec:intercept-url pattern="/user/login" access="permitAll" />
+        <sec:intercept-url pattern="/user/join" access="permitAll" />
+        <sec:intercept-url pattern="/user/leave" access="hasRole('USER')" />
+        <sec:intercept-url pattern="/user/update" access="hasRole('USER')" /> -->
+        
+<!--         <sec:intercept-url pattern="/notice/update" access="hasRole('ADMIN')" />
+        <sec:intercept-url pattern="/notice/write" access="hasRole('ADMIN')" />
+        
+        <sec:intercept-url pattern="/**" access="isAuthenticated()" /> -->
+        
+	<logout invalidate-session="true" logout-url="/user/logout" logout-success-url="/user/login"/>
+    <sec:csrf disabled="true"/>
+    </sec:http>
+
+    <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+   <!--  <beans:bean id="saltSource" class="org.springframework.security.authentication.dao.ReflectionSaltSource">
+    	<beans:property name="userPropretyToUse" value="username"></beans:property>
+    </beans:bean> -->
+    
+    <sec:authentication-manager alias="authenticationManager">
+        <sec:authentication-provider>
+        	<sec:jdbc-user-service data-source-ref="dataSource" id="jdbcUserService"
+        	users-by-username-query="select userid, userpw, enabled from tb_user where userid = ?"
+        	authorities-by-username-query="select userid, authority from tb_user where userid = ?"
+        	/>
+        	<!-- <sec:password-encoder ref="passwordEncoder">
+        		<sec:salt-source ref="saltSource"/>
+        	</sec:password-encoder> -->
+        </sec:authentication-provider>
+    </sec:authentication-manager>
+     
+</beans:beans>

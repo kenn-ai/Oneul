@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="kr.co.oneul.diaryMapper">
+
+	<select id="checkDiaryInPriv" parameterType="hashmap" resultType="int">
+		<![CDATA[
+			SELECT COUNT(DIARY_NO)
+			FROM TB_DIARY
+			WHERE USERID = #{userid} AND TO_CHAR(REGDATE, 'YYYYMMDD') LIKE #{date} AND GROUP_NO IS NULL
+		]]>
+	</select>
+	
+	<select id="checkDiaryInGroup" parameterType="hashmap" resultType="int">
+		<![CDATA[
+			SELECT COUNT(DIARY_NO)
+			FROM TB_DIARY
+			WHERE USERID = #{userid} AND TO_CHAR(REGDATE, 'YYYYMMDD') LIKE #{date} AND GROUP_NO = #{group_no}
+		]]>
+	</select>
+
+	<!-- 공통 -->
+	<select id="readDiary" resultType="DiaryVO">
+		<![CDATA[
+			SELECT DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+			FROM TB_DIARY
+			WHERE DIARY_NO = #{diary_no}
+		]]>
+	</select>
+	
+	<delete id="deleteDiary">
+		<![CDATA[
+			{ CALL DEL_DIARY( #{diary_no} ) }
+		]]>
+	</delete>
+ 
+ 	<!-- InPriv -->
+ 
+	<select id="listDiaryInPriv" parameterType="hashmap" resultType="DiaryVO">
+		<![CDATA[
+			SELECT DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+			FROM(
+				SELECT *
+				FROM(
+				SELECT ROWNUM RNUM, DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+					FROM TB_DIARY
+					WHERE USERID = #{userDTO.userid} AND GROUP_NO IS NULL
+					ORDER BY REGDATE DESC, DIARY_NO DESC
+				) TB_DIARY
+			WHERE RNUM <= #{diaryCri.first}
+			)
+			WHERE RNUM > #{diaryCri.last}
+			ORDER BY DIARY_NO DESC
+		]]>		
+	</select>
+
+	<insert id="writeDiaryInPriv">
+		<![CDATA[
+			INSERT INTO TB_DIARY
+			(DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG)
+			VALUES(SEQ_DIARY_NO.NEXTVAL, NULL, #{priv}, #{userid}, #{nickname}, #{weather}, #{emotion}, #{location}, #{title}, #{contents}, #{link}, #{tag})
+		]]>
+	</insert>
+	
+	<update id="updateDiaryInPriv">
+		<![CDATA[
+			UPDATE TB_DIARY 
+			SET
+			PRIV = #{priv},
+			NICKNAME = #{nickname},
+			WEATHER = #{weather},
+			EMOTION = #{emotion},
+			LOCATION = #{location},
+			TITLE = #{title},
+			CONTENTS = #{contents},
+			LINK = #{link},
+			TAG = #{tag}
+			WHERE DIARY_NO = #{diary_no}
+		]]>
+	</update>
+	
+	<select id="randomDiary" resultType="DiaryVO">
+		<![CDATA[
+			SELECT DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+			FROM(SELECT * FROM TB_DIARY
+			     WHERE GROUP_NO IS NULL
+			     AND PRIV='F'
+			     ORDER BY DBMS_RANDOM.RANDOM)
+			WHERE ROWNUM =1
+		]]>
+	</select>
+	
+	<select id="searchDiaryInPriv" resultType="DiaryVO">
+		<![CDATA[			
+			SELECT ROWNUM RNUM, DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+		    FROM(SELECT *
+		    FROM(SELECT *
+			FROM TB_DIARY
+			WHERE USERID = #{userid} AND GROUP_NO IS NULL)
+			WHERE TO_CHAR(REGDATE, 'YYYYMMDD') LIKE #{searchRegdate})
+		 	WHERE LOCATION LIKE '%'||#{searchWord}||'%' 
+			OR TITLE LIKE '%'||#{searchWord}||'%'
+			OR CONTENTS LIKE '%'||#{searchWord}||'%'
+			ORDER BY REGDATE DESC, DIARY_NO DESC		
+		]]>	
+	</select>
+	
+	<!-- InGroup -->
+	
+	<select id="listDiaryInGroup" parameterType="hashmap" resultType="DiaryVO">
+		<![CDATA[
+			SELECT DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+			FROM(
+				SELECT *
+				FROM(
+				SELECT ROWNUM RNUM, DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+					FROM TB_DIARY
+					WHERE GROUP_NO = #{userDTO.group_no}
+					ORDER BY REGDATE DESC, DIARY_NO DESC
+				) TB_DIARY
+			WHERE RNUM <= #{diaryCri.first}
+			)
+			WHERE RNUM > #{diaryCri.last}
+			ORDER BY DIARY_NO DESC
+		]]>
+	</select>
+
+	<insert id="writeDiaryInGroup">
+		<![CDATA[
+			INSERT INTO TB_DIARY
+			(DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG)
+			VALUES(SEQ_DIARY_NO.NEXTVAL, #{group_no}, null, #{userid}, #{nickname}, #{weather}, #{emotion}, #{location}, #{title}, #{contents}, #{link}, #{tag})
+		]]>
+	</insert>
+	
+	<update id="updateDiaryInGroup">
+		<![CDATA[
+			UPDATE TB_DIARY 
+			SET
+			NICKNAME = #{nickname},
+			WEATHER = #{weather},
+			EMOTION = #{emotion},
+			LOCATION = #{location},
+			TITLE = #{title},
+			CONTENTS = #{contents},
+			LINK = #{link},
+			TAG = #{tag}
+			WHERE DIARY_NO = #{diary_no}
+		]]>
+	</update>
+
+	<select id="searchDiaryInGroup" resultType="DiaryVO">
+		<![CDATA[
+			SELECT ROWNUM RNUM, DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+		    FROM(SELECT *
+		    FROM(SELECT *
+		    FROM(SELECT *
+			FROM TB_DIARY 
+			WHERE GROUP_NO = #{group_no})
+			WHERE TO_CHAR(REGDATE, 'YYYYMMDD') LIKE #{searchRegdate})
+		    WHERE USERID LIKE '%'||#{userid}||'%')
+		    WHERE LOCATION LIKE '%'||#{searchWord}||'%' 
+			OR TITLE LIKE '%'||#{searchWord}||'%'
+			OR CONTENTS LIKE '%'||#{searchWord}||'%'
+			ORDER BY REGDATE DESC, DIARY_NO DESC
+		]]>	
+	</select>
+	
+	<select id="countPagingInPriv" parameterType="hashmap" resultType="int">
+		<![CDATA[
+			SELECT COUNT(DIARY_NO)
+			FROM TB_DIARY
+			WHERE USERID = #{userDTO.userid} AND GROUP_NO IS NULL
+		]]>
+	</select>
+	
+	<select id="countPagingInGroup" parameterType="hashmap" resultType="int">
+		<![CDATA[
+			SELECT COUNT(DIARY_NO)
+			FROM TB_DIARY
+			WHERE GROUP_NO = #{userDTO.group_no}
+		]]>
+	</select>
+	
+	<!-- Mobile -->
+	<select id="listDiaryInPrivForM" resultType="DiaryVO">
+		<![CDATA[
+			SELECT DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+			FROM TB_DIARY
+			WHERE USERID = #{userid} AND GROUP_NO IS NULL
+			ORDER BY REGDATE DESC, DIARY_NO DESC
+		]]>
+	</select>
+
+	<select id="listDiaryInGroupForM" resultType="DiaryVO">
+		<![CDATA[
+			SELECT DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+			FROM TB_DIARY
+			WHERE GROUP_NO = #{group_no}
+			ORDER BY REGDATE DESC, DIARY_NO DESC
+		]]>
+	</select>
+	
+	<select id="searchDiaryInPrivForM" resultType="DiaryVO">
+		<![CDATA[
+			SELECT ROWNUM RNUM, DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+		    FROM(SELECT *
+		    FROM(SELECT *
+			FROM TB_DIARY
+			WHERE USERID = #{userid} AND GROUP_NO IS NULL)
+			WHERE TO_CHAR(REGDATE, 'YYYYMMDD') LIKE #{searchRegdate})
+		 	WHERE LOCATION LIKE '%'||#{searchWord}||'%' 
+			OR TITLE LIKE '%'||#{searchWord}||'%'
+			OR CONTENTS LIKE '%'||#{searchWord}||'%'
+			ORDER BY REGDATE DESC, DIARY_NO DESC
+		]]>
+	</select>
+
+	<select id="searchDiaryInGroupForM" resultType="DiaryVO">
+		<![CDATA[
+			SELECT ROWNUM RNUM, DIARY_NO, GROUP_NO, PRIV, USERID, NICKNAME, WEATHER, EMOTION, LOCATION, TITLE, CONTENTS, LINK, TAG, REGDATE
+		    FROM(SELECT *
+		    FROM(SELECT *
+		    FROM(SELECT *
+			FROM TB_DIARY 
+			WHERE GROUP_NO = #{group_no})
+			WHERE TO_CHAR(REGDATE, 'YYYYMMDD') LIKE #{searchRegdate})
+		    WHERE USERID LIKE '%'||#{userid}||'%')
+		    WHERE LOCATION LIKE '%'||#{searchWord}||'%' 
+			OR TITLE LIKE '%'||#{searchWord}||'%'
+			OR CONTENTS LIKE '%'||#{searchWord}||'%'
+			ORDER BY REGDATE DESC, DIARY_NO DESC
+		]]>
+	</select>
+	
+	<!-- 파일 -->
+	<insert id="addAttach">
+		<![CDATA[
+			INSERT INTO TB_FILE(FILE_NO, DIARY_NO, FULLNAME, USERID) 
+			VALUES(SEQ_FILE_NO.NEXTVAL, SEQ_DIARY_NO.CURRVAL, #{fullName}, #{userid})
+		]]>
+	</insert>
+
+	<insert id="addAttachForM">
+		<![CDATA[
+			INSERT INTO TB_FILE(FILE_NO, DIARY_NO, FULLNAME, USERID) 
+			VALUES(SEQ_FILE_NO.NEXTVAL, #{diary_no}, #{fullName}, ${userid})
+		]]>
+	</insert>
+	
+	<select id="getAttach" resultType="string">
+		<![CDATA[
+			SELECT FULLNAME 
+			FROM TB_FILE 
+			WHERE DIARY_NO = #{diary_no} 
+			ORDER BY REGDATE
+		]]>
+	</select>
+	
+	<delete id="deleteAttach">
+		<![CDATA[
+		DELETE FROM TB_FILE WHERE DIARY_NO = #{diary_no}
+		]]>
+	</delete>
+	
+	<insert id="replaceAttach">
+		<![CDATA[
+		INSERT INTO TB_FILE(FULLNAME, DIARY_NO, USERID) VALUES (#{fullName}, #{diary_no}, #{userid})
+		]]>
+	</insert>
+	<!-- 글감 -->
+	<select id="material" resultType="Material">
+		<![CDATA[
+			SELECT * FROM TB_MATERIAL
+		]]>
+	</select>
+</mapper>

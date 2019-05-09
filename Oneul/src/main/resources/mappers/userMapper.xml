@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneul.userMapper">
+
+	<select id="loginUser" resultType="UserDTO">
+	<![CDATA[
+	SELECT USERID, USERPW, NICKNAME, AUTHORITY FROM TB_USER
+	WHERE USERID = #{userid}
+	]]>
+	</select>
+
+	<insert id="joinUser">
+	<![CDATA[
+	INSERT INTO TB_USER (USER_NO, USERID, USERPW, NICKNAME, PHONE, AUTHORITY)
+	VALUES (SEQ_USER_NO.NEXTVAL, #{userid}, #{userpw}, #{nickname}, #{phone}, 'USER')
+	]]>
+	</insert>
+
+	<select id="readUser" resultType="UserVO">
+	<![CDATA[
+	SELECT * FROM TB_USER WHERE USERID = #{userid}
+	]]>
+	</select>
+
+	<update id="updateUser">
+	<![CDATA[
+	UPDATE TB_USER SET USERPW = #{userpw}, NICKNAME = #{nickname}, PHONE = #{phone}
+	WHERE USERID = #{userid}
+	]]>
+	</update>
+
+	<!-- DELETE FROM TB_USER WHERE USERID = #{userid} -->
+
+	<delete id="leaveUser">
+	<![CDATA[
+	{ CALL LEAVE_USER(#{userid}) }
+	]]>
+	</delete>
+
+	<select id="searchUser" resultType="UserVO">
+	<![CDATA[
+	SELECT USERID, NICKNAME FROM TB_USER WHERE USERID = #{userid}
+	]]>
+	</select>
+
+	<select id="confirmUser" resultType="UserVO">
+	<![CDATA[
+	SELECT USERID, USERPW FROM TB_USER
+	WHERE USERID = #{userid}
+	]]>
+	</select>
+
+	<select id="checkUser" resultType="java.lang.String">
+	<![CDATA[
+	SELECT USERID FROM TB_USER
+	WHERE USERID = #{userid}
+	]]>
+	</select>
+
+</mapper>

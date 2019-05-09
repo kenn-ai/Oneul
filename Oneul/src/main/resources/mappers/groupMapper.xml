@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="kr.co.oneul.groupMapper">
+	<select id="listGroup" resultType="GroupVO">
+	<![CDATA[
+		SELECT GROUP_NO, NAME, REGDATE
+        FROM TB_GROUP
+        WHERE GROUP_NO IN (SELECT GROUP_NO 
+                    FROM TB_MEMBER 
+                    WHERE USERID=#{userid})
+        ORDER BY GROUP_NO ASC, REGDATE ASC
+	]]>
+	</select>
+	
+	<update id="makeGroup" statementType="CALLABLE">
+	<![CDATA[
+		{ call MAKE_GROUP(#{name}, #{userid}) }
+	]]>
+	</update>
+	
+	<delete id="leaveGroup">
+	<![CDATA[
+		DELETE
+		FROM TB_MEMBER
+		WHERE GROUP_NO=#{group_no} AND USERID=#{userid}
+	]]>
+	</delete>
+	
+	<select id="infoGroup" resultType="GroupVO">
+	<![CDATA[
+		SELECT GROUP_NO, NAME, REGDATE
+		FROM TB_GROUP
+		WHERE GROUP_NO = #{group_no}
+	]]>
+	
+	</select>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.oneul.fcmMapper">
+	
+	<select id="checkToken" resultType="FcmDTO">
+		<![CDATA[
+			SELECT TOKEN FROM TB_FCM WHERE USERID=#{userid} OR TOKEN=#{token}
+		]]>
+	</select>
+	
+	<select id="checkToken2" resultType="FcmDTO">
+		<![CDATA[
+			SELECT TOKEN FROM TB_FCM
+			WHERE TOKEN = #{token}
+		]]>
+	</select>
+	
+	<select id="getToken" resultType="FcmDTO">
+		<![CDATA[
+			SELECT TOKEN FROM TB_FCM
+			WHERE REGDATE=(SELECT MAX(REGDATE)AS REGDATE FROM TB_FCM WHERE USERID = #{userid})
+		]]>
+	</select>
+
+	<insert id="regist">
+		<![CDATA[
+			INSERT INTO TB_FCM(FCM_NO, TOKEN, USERID)
+			VALUES(SEQ_FCM_NO.NEXTVAL, #{token}, #{userid})
+		]]>
+	</insert>
+	
+	<update id="update">
+		<![CDATA[
+			UPDATE TB_FCM
+			SET USERID = #{userid}, REGDATE = SYSDATE
+			WHERE TOKEN = #{token}
+		]]>
+	</update>
+</mapper>

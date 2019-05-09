@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="kr.co.oneul.mapMapper">
+	<insert id="savemap">
+	<![CDATA[
+		INSERT INTO TB_MAP
+		(DIARY_NO, USERID, X, Y, ADDRESS)
+		VALUES(NULL, #{userid}, #{x}, #{y}, #{address})
+	]]>
+	</insert>
+	
+	<select id="todaymap" resultType="MapVO">
+		<![CDATA[
+			SELECT X, Y, ADDRESS FROM (SELECT * FROM TB_MAP WHERE USERID = #{userid})
+			WHERE TO_CHAR(REGDATE, 'YYYYMMDD') LIKE #{regdate}
+		]]>
+	</select>
+</mapper>

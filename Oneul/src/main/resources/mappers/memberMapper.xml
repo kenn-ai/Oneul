@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="kr.co.oneul.memberMapper">
+	
+	<select id="listMember" resultType="MemberVO">
+		<![CDATA[
+			SELECT M.GROUP_NO, M.USERID, U.NICKNAME
+			FROM TB_MEMBER M, TB_USER U
+			WHERE M.USERID = U.USERID 
+			AND M.GROUP_NO = #{group_no}
+		]]>
+	</select>
+	
+	<insert id="addMember" statementType="CALLABLE">
+	<![CDATA[
+		{ call ADD_MEMBER(#{alarm_no}, #{group_no}, #{userid}, #{nickname}) }
+	]]>
+	</insert>
+	
+	<select id="searchMemberId" resultType="java.lang.String">
+		<![CDATA[
+			SELECT USERID 
+			FROM TB_MEMBER 
+			WHERE NICKNAME = #{ nickname } AND GROUP_NO = #{ group_no }
+		]]>
+	</select>
+	
+</mapper>

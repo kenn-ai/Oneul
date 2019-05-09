@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="kr.co.oneul.alarmMapper">
+	<insert id="inviteAlarm">
+		<![CDATA[
+			INSERT INTO TB_ALARM(ALARM_NO, WRITER, NICKNAME_W, READER, NICKNAME_R, CONTENTS, TYPE, GROUP_NO)
+			VALUES (SEQ_ALARM_NO.NEXTVAL, #{ writer }, #{nickname_w}, #{ reader }, #{nickname_r}, #{ contents }, #{ type }, #{ group_no })
+		]]>
+	</insert>
+	
+	<select id="countAlarm" resultType="AlarmVO">
+		<![CDATA[
+			SELECT ALARM_NO, WRITER, NICKNAME_W, READER, NICKNAME_R, CONTENTS, TYPE, GROUP_NO 
+			FROM TB_ALARM
+			WHERE READER=#{ reader }
+		]]>
+	</select>
+	
+	<delete id="deleteAlarm">
+		<![CDATA[
+			DELETE FROM TB_ALARM
+			WHERE ALARM_NO = #{ alarm_no }
+		]]>
+	</delete>
+</mapper>
